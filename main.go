@@ -5,25 +5,25 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/psycomentis/psycofolio++/src/config"
+	"github.com/psycomentis/psycofolio++/src/middlewares"
 )
 
 func main() {
+	db := config.CreateDBInstance()
+	config.Migrate(db)
+
 	r := gin.Default()
+	r.Use(middlewares.Injector(db))
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Hello, World!",
+			"message": "Psycofolio++",
 		})
 	})
 
 	// This handler will return the admin Angular app
 	r.GET("/admin/*any", func(ctx *gin.Context) {
-		/*proxy := httputil.NewSingleHostReverseProxy(&url.URL{
-			Scheme: "http",
-			Host:   "localhost:4200",
-		})
-		proxy.ServeHTTP(ctx.Writer, ctx.Request)
-		*/
 		r.LoadHTMLGlob("web/admin/dist/admin/browser/*")
 		ctx.HTML(200, "index.html", nil)
 	})
