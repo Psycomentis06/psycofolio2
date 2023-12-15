@@ -1,0 +1,268 @@
+--------------------phind ver
+
+classDiagram
+   class User {
+       +String name
+       +String address
+       +String summary
+       +String phoneNumber
+       +String profilePic
+   }
+
+   class Skill {
+       +String name
+       +String description
+       +String translation
+   }
+
+   class Hobby {
+       +String name
+       +String description
+       +String translation
+   }
+
+   class Project {
+       +String name
+       +String description
+       +String translation
+   }
+
+   class Experience {
+       +String position
+       +String company
+       +String duration
+       +String translation
+   }
+
+   class Education {
+       +String degree
+       +String institution
+       +String duration
+       +String translation
+   }
+
+   class Certification {
+       +String name
+       +String issuer
+       +String date
+       +String translation
+   }
+
+   class Language {
+       +String name
+       +String proficiency
+       +String translation
+   }
+
+   class Filter {
+       +String name
+       +String type
+   }
+
+   User "1" -- "0..*" Skill : has
+   User "1" -- "0..*" Hobby : has
+   User "1" -- "0..*" Project : has
+   User "1" -- "0..*" Experience : has
+   User "1" -- "0..*" Education : has
+   User "1" -- "0..*" Certification : has
+   User "1" -- "0..*" Language : has
+   User "1" -- "0..*" Filter : has
+
+   Skill "1" -- "0..*" Filter : belongsTo
+   Hobby "1" -- "0..*" Filter : belongsTo
+   Project "1" -- "0..*" Filter : belongsTo
+   Experience "1" -- "0..*" Filter : belongsTo
+   Education "1" -- "0..*" Filter : belongsTo
+   Certification "1" -- "0..*" Filter : belongsTo
+   Language "1" -- "0..*" Filter : belongsTo
+
+
+---you ver
+classDiagram
+  class User {
+    - String name
+    - String address
+    - String summary
+    - String phoneNumber
+    - String profilePicture
+  }
+
+  class Profile {
+    - String type
+  }
+
+  class Skill {
+    - String name
+  }
+
+  class Hobby {
+    - String name
+  }
+
+  class Project {
+    - String name
+  }
+
+  class Experience {
+    - String title
+    - String description
+  }
+
+  class Education {
+    - String degree
+    - String institution
+  }
+
+  class Certification {
+    - String name
+  }
+
+  class Language {
+    - String name
+  }
+
+  class Translation {
+    - String language
+    - String translatedText
+  }
+
+  class Website {
+    - List<User> users
+    - List<Profile> profiles
+    - List<Skill> skills
+    - List<Hobby> hobbies
+    - List<Project> projects
+    - List<Experience> experiences
+    - List<Education> educations
+    - List<Certification> certifications
+    - List<Language> languages
+    - List<Translation> translations
+    --
+    + filterProfile(profileType: String): void
+    + addTranslation(text: String, language: String): void
+    + setLanguages(languages: List<Language>): void
+  }
+
+  User "1" --> "1" Website
+  Profile "1" --> "1" Website
+  Skill "1" --> "1" Website
+  Hobby "1" --> "1" Website
+  Project "1" --> "1" Website
+  Experience "1" --> "1" Website
+  Education "1" --> "1" Website
+  Certification "1" --> "1" Website
+  Language "1" --> "1" Website
+  Translation "1" --> "1" Website
+
+
+--- Bard ver
+
+classDiagram
+    class User {
+        + name: String
+        + address: String
+        + summary: String
+        + phoneNumber: String
+        + profilePic: Image
+        + skills: List<Skill>
+        + hobbies: List<Hobby>
+        + projects: List<Project>
+        + experience: List<Experience>
+        + education: List<Education>
+        + certifications: List<Certification>
+        + languages: List<Language>
+    }
+
+    class Skill {
+        + name: String
+        + level: Integer
+        + description: String
+        + translations: Map<String, String>
+    }
+
+    class Hobby {
+        + name: String
+        + description: String
+        + translations: Map<String, String>
+    }
+
+    class Project {
+        + name: String
+        + description: String
+        + technologies: List<String>
+        + startDate: Date
+        + endDate: Date
+        + links: List<Link>
+        + translations: Map<String, String>
+    }
+
+    class Experience {
+        + companyName: String
+        + jobTitle: String
+        + startDate: Date
+        + endDate: Date
+        + description: String
+        + translations: Map<String, String>
+    }
+
+    class Education {
+        + institutionName: String
+        + degree: String
+        + startDate: Date
+        + endDate: Date
+        + description: String
+        + translations: Map<String, String>
+    }
+
+    class Certification {
+        + name: String
+        + issuer: String
+        + date: Date
+        + description: String
+        + translations: Map<String, String>
+    }
+
+    class Language {
+        + name: String
+        + level: Integer
+        + translations: Map<String, String>
+    }
+
+    User --> Skill
+    User --> Hobby
+    User --> Project
+    User --> Experience
+    User --> Education
+    User --> Certification
+    User --> Language
+
+    Skill --> Translation
+    Hobby --> Translation
+    Project --> Translation
+    Experience --> Translation
+    Education --> Translation
+    Certification --> Translation
+    Language --> Translation
+
+    class Translation {
+        + languageCode: String
+        + text: String
+    }
+
+    class Link {
+        + url: String
+        + description: String
+    }
+
+    Project --> Link
+
+    class ClassFilter {
+        + profileName: String
+    }
+    User --|> ClassFilter
+
+    class Admin {
+        + availableLanguages: List<Language>
+    }
+
+    Admin --|> Language
