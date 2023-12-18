@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Running App")
+	services.InitApplicationFolders()
 	db := services.CreateDBInstance()
 	services.Migrate(db)
 
