@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/psycomentis/psycofolio++/src/config"
 	"github.com/psycomentis/psycofolio++/src/middlewares"
+	"github.com/psycomentis/psycofolio++/src/services"
 )
 
 func main() {
-	db := config.CreateDBInstance()
-	config.Migrate(db)
+	fmt.Println("Running App")
+	db := services.CreateDBInstance()
+	services.Migrate(db)
 
 	r := gin.Default()
 	r.Use(middlewares.Injector(db))
