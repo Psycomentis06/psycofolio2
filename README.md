@@ -17,6 +17,14 @@ Successor for Psycofolio project
 
 ##### Folder Structure
 
+`locales` => Contains application translations
+
+`locales/admin` => Admin application translation
+
+`locales/app` => Application translation
+
+`locales/back` => Server translation
+
 `/scripts` => Automation bash scripts
 
 `/src` => Go server source code
