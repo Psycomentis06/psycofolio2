@@ -11,7 +11,7 @@ import (
 var ApplicationDir = "$HOME/.local/share/psycofolio2"
 var LocaleDir = "./locales"
 var ConfigDir = "$HOME/.config/psycofolio2"
-var ConfigFile = ConfigDir + "/config.json"
+var ConfigFile = ""
 
 func InitApplicationFolders() {
 	appDirPath, appDirErr := src.GetFullPath(ApplicationDir)
@@ -35,6 +35,7 @@ func InitApplicationFolders() {
 		log.Error().Err(mkErr).Msg("Failed to create application directory")
 		return
 	}
+	ConfigFile = ConfigDir + "/config.json"
 }
 
 func createDirIfNotExist(path string) error {
