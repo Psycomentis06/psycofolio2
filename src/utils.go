@@ -22,3 +22,12 @@ func GetFullPath(path string) (string, error) {
 	}
 	return path, nil
 }
+
+// Get a default value from a map if exists otherwise return the given default value
+func GetOrDefault(m *map[string]interface{}, key string, defaultValue string) string {
+	value, ok := (*m)[key]
+	if ok {
+		return value.(string)
+	}
+	return defaultValue
+}

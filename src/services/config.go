@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/psycomentis/psycofolio++/src"
 	"github.com/rs/zerolog/log"
 )
 
@@ -16,7 +17,7 @@ type Config struct {
 	AdminPassword  string `json:"admin_password" default:"admin"`
 	PasswordMethod string `json:"password_method" default:"plain"`
 
-	DatabaseConnectionString string `json:"db_connection"`
+	DatabaseConnectionString string `json:"db_connection" default:"./psyco.db"`
 	DatabaseEngine           string `json:"database_engine" default:"sqlite"`
 
 	DefaultLocale  string `json:"default_locale" default:"en_US"`
@@ -49,8 +50,19 @@ func LoadConfig(path string) (Config, error) {
 	return Config{}, nil
 }
 
-func parseConfigV1(*map[string]interface{}) Config {
-	return Config{}
+func parseConfigV1(m *map[string]interface{}) Config {
+	cnf := Config{
+		Version:                  "1",
+		ServerPort:               src.GetOrDefault(m, "server_port", "8080"),
+		AdminUsername:            src.GetOrDefault(m, "admin_username", "admin"),
+		AdminPassword:            src.GetOrDefault(m, "admin_password", "admin"),
+		PasswordMethod:           src.GetOrDefault(m, "password_method", "plain"),
+		DatabaseConnectionString: src.GetOrDefault(m, "db_connection", "./psyco.db"),
+		DatabaseEngine:           src.GetOrDefault(m, "database_engine", "sqlite"),
+		DefaultLocale:            src.GetOrDefault(m, "default_locale", "en_US"),
+		SelectedLocale:           src.GetOrDefault(m, "selected_locale", "en_US"),
+	}
+	return cnf
 }
 
 func CreateDefaultConfig() Config {
