@@ -10,9 +10,6 @@ import (
 type Config struct {
 	Version string `json:"version" default:"1"`
 
-	DataDir   string `json:"data_dir" default:"$HOME/.local/share/psycofolio2"`
-	ConfigDir string `json:"config_dir" default:"$HOME/.config/psycofolio2"`
-
 	ServerPort string `json:"server_port" default:"8080"`
 
 	AdminUsername  string `json:"admin_username" default:"admin"`
@@ -30,8 +27,10 @@ type Config struct {
 func LoadConfig(path string) (Config, error) {
 	file, openErr := os.Open(ConfigFile)
 	if openErr != nil {
-		log.Warn().Msg("Config File not found. Using Defaults")
-		return CreateDefaultConfig(), nil
+		cnf := CreateDefaultConfig()
+		cnf.ExportToJson(path)
+		log.Log().Msg("Config file not found. Generating default config to: " + path)
+		return cnf, nil
 	}
 	var mapData map[string]interface{}
 	decodeErr := json.NewDecoder(file).Decode(&mapData)
@@ -68,7 +67,12 @@ func CreateDefaultConfig() Config {
 	}
 }
 
-func (cnf *Config) ExportToJson(path string) {
+func (cnf *Config) ExportToJson(path string) error {
+	d, err := json.Marshal(cnf)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, d, os.ModePerm)
 }
 
 /* func CreateDefaultConfig() (Config, error) {
