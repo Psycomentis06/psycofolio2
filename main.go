@@ -7,11 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/psycomentis/psycofolio++/src/middlewares"
 	"github.com/psycomentis/psycofolio++/src/services"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	services.InitApplicationFolders()
-	db := services.CreateDBInstance()
+	cnf, err := services.LoadConfig(services.ConfigFile)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to load configuration")
+		return
+	}
+	db, dbErr := services.CreateDBInstance(&cnf)
+	if dbErr != nil {
+		log.Err(dbErr)
+		return
+	}
 	services.Migrate(db)
 
 	r := gin.Default()
@@ -42,5 +52,5 @@ func main() {
 		})
 	})
 
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run("0.0.0.0:" + cnf.ServerPort)
 }

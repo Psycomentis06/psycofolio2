@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"os"
 
 	"github.com/rs/zerolog/log"
@@ -9,10 +10,10 @@ import (
 type Config struct {
 	Version string `json:"version" default:"1"`
 
-	DataDir   string `json:"data_dir" default:"$HOME/.locale/share/psycofolio2"`
+	DataDir   string `json:"data_dir" default:"$HOME/.local/share/psycofolio2"`
 	ConfigDir string `json:"config_dir" default:"$HOME/.config/psycofolio2"`
 
-	ServerPort uint16 `json:"server_port" default:"80"`
+	ServerPort string `json:"server_port" default:"8080"`
 
 	AdminUsername  string `json:"admin_username" default:"admin"`
 	AdminPassword  string `json:"admin_password" default:"admin"`
@@ -21,30 +22,49 @@ type Config struct {
 	DatabaseConnectionString string `json:"db_connection"`
 	DatabaseEngine           string `json:"database_engine" default:"sqlite"`
 
-	DefaultLanguage string `json:"default_lang" default:"en_US"`
+	DefaultLocale  string `json:"default_locale" default:"en_US"`
+	SelectedLocale string `json:"selected_locale" default:"en_US"`
 }
 
 // Loads file from default directory
 func LoadConfig(path string) (Config, error) {
-	_, openErr := os.Open(ConfigFile)
+	file, openErr := os.Open(ConfigFile)
 	if openErr != nil {
-		log.Print("Config File not found. Using Defaults")
+		log.Warn().Msg("Config File not found. Using Defaults")
+		return CreateDefaultConfig(), nil
+	}
+	var mapData map[string]interface{}
+	decodeErr := json.NewDecoder(file).Decode(&mapData)
+	if decodeErr != nil {
+		log.Error().
+			Err(decodeErr).
+			Msg("Failed to decode configuration file.")
+	}
+	configVer := mapData["version"]
+	if configVer != "" {
+		switch configVer {
+		case "1":
+			return parseConfigV1(&mapData), nil
+		}
 	}
 	return Config{}, nil
 }
 
-func parseConfigV1() {}
+func parseConfigV1(*map[string]interface{}) Config {
+	return Config{}
+}
 
 func CreateDefaultConfig() Config {
 	return Config{
 		Version:                  "1",
-		ServerPort:               80,
+		ServerPort:               "8080",
 		AdminUsername:            "admin",
 		AdminPassword:            "admin",
 		PasswordMethod:           "plain",
-		DefaultLanguage:          "en_US",
+		DefaultLocale:            "en_US",
+		SelectedLocale:           "en_US",
 		DatabaseEngine:           "sqlite",
-		DatabaseConnectionString: ApplicationDir + "psyco.db",
+		DatabaseConnectionString: ApplicationDir + "/psyco.db",
 	}
 }
 

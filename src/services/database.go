@@ -1,19 +1,18 @@
 package services
 
 import (
-	"log"
-
 	"github.com/psycomentis/psycofolio++/src/models"
+	"github.com/rs/zerolog/log"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func CreateDBInstance() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("psycofolio.db"), &gorm.Config{})
+func CreateDBInstance(config *Config) (*gorm.DB, error) {
+	db, err := gorm.Open(sqlite.Open(config.DatabaseConnectionString), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
+		log.Err(err)
 	}
-	return db
+	return db, nil
 }
 
 func Migrate(db *gorm.DB) {
