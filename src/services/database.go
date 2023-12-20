@@ -8,7 +8,7 @@ import (
 )
 
 func CreateDBInstance(config *Config) (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(config.DatabaseConnectionString), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(config.Database.ConnectionString), &gorm.Config{})
 	if err != nil {
 		log.Err(err)
 	}

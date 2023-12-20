@@ -13,15 +13,29 @@ type Config struct {
 
 	ServerPort string `json:"server_port" default:"8080"`
 
-	AdminUsername  string `json:"admin_username" default:"admin"`
-	AdminPassword  string `json:"admin_password" default:"admin"`
-	PasswordMethod string `json:"password_method" default:"plain"`
+	Admin AdminConfig `json:"admin"`
 
-	DatabaseConnectionString string `json:"db_connection" default:"./psyco.db"`
-	DatabaseEngine           string `json:"database_engine" default:"sqlite"`
+	Database DatabaseConfig `json:"database"`
 
-	DefaultLocale  string `json:"default_locale" default:"en_US"`
-	SelectedLocale string `json:"selected_locale" default:"en_US"`
+	Locale LocaleConfig `json:"locale"`
+}
+
+type AdminConfig struct {
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Theme     string `json:"theme"`
+	ThemeMode string `json:"theme_mode"`
+	Locale    string `json:"locale"`
+}
+
+type DatabaseConfig struct {
+	Engine           string `json:"engine"`            // sqlite or postgres
+	ConnectionString string `json:"connection_string"` // required for postgres
+}
+
+type LocaleConfig struct {
+	Default  string `json:"default"` // fallback locale
+	Selected string `json:"selected"`
 }
 
 // Loads file from default directory
@@ -33,6 +47,7 @@ func LoadConfig(path string) (Config, error) {
 		log.Log().Msg("Config file not found. Generating default config to: " + path)
 		return cnf, nil
 	}
+	defer file.Close()
 	var mapData map[string]interface{}
 	decodeErr := json.NewDecoder(file).Decode(&mapData)
 	if decodeErr != nil {
@@ -52,30 +67,51 @@ func LoadConfig(path string) (Config, error) {
 
 func parseConfigV1(m *map[string]interface{}) Config {
 	cnf := Config{
-		Version:                  "1",
-		ServerPort:               src.GetOrDefault(m, "server_port", "8080"),
-		AdminUsername:            src.GetOrDefault(m, "admin_username", "admin"),
-		AdminPassword:            src.GetOrDefault(m, "admin_password", "admin"),
-		PasswordMethod:           src.GetOrDefault(m, "password_method", "plain"),
-		DatabaseConnectionString: src.GetOrDefault(m, "db_connection", "./psyco.db"),
-		DatabaseEngine:           src.GetOrDefault(m, "database_engine", "sqlite"),
-		DefaultLocale:            src.GetOrDefault(m, "default_locale", "en_US"),
-		SelectedLocale:           src.GetOrDefault(m, "selected_locale", "en_US"),
+		Version:    "1",
+		ServerPort: src.GetOrDefault(m, "server_port", "8080"),
 	}
+
+	// Build AdminConfig
+	adminConfig := AdminConfig{
+		Username: src.GetOrDefault(m, "admin_username", "admin"),
+		Password: src.GetOrDefault(m, "admin_password", "admin"),
+	}
+	cnf.Admin = adminConfig
+
+	// Build DatabaseConfig
+	dbConfig := DatabaseConfig{
+		ConnectionString: src.GetOrDefault(m, "db_connection", "./psyco.db"),
+		Engine:           src.GetOrDefault(m, "database_engine", "sqlite"),
+	}
+	cnf.Database = dbConfig
+
+	// Build LocaleConfig
+	localeConfig := LocaleConfig{
+		Default:  src.GetOrDefault(m, "default_locale", "en_US"),
+		Selected: src.GetOrDefault(m, "selected_locale", "en_US"),
+	}
+	cnf.Locale = localeConfig
+
 	return cnf
 }
 
 func CreateDefaultConfig() Config {
 	return Config{
-		Version:                  "1",
-		ServerPort:               "8080",
-		AdminUsername:            "admin",
-		AdminPassword:            "admin",
-		PasswordMethod:           "plain",
-		DefaultLocale:            "en_US",
-		SelectedLocale:           "en_US",
-		DatabaseEngine:           "sqlite",
-		DatabaseConnectionString: ApplicationDir + "/psyco.db",
+		Version:    "1",
+		ServerPort: "8080",
+		Admin: AdminConfig{
+			Username: "admin",
+			Password: "admin",
+			Locale:   "en_US",
+		},
+		Locale: LocaleConfig{
+			Default:  "en_US",
+			Selected: "en_US",
+		},
+		Database: DatabaseConfig{
+			Engine:           "sqlite",
+			ConnectionString: ApplicationDir + "/psyco.db",
+		},
 	}
 }
 
