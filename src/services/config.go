@@ -41,6 +41,7 @@ type LocaleConfig struct {
 // Loads file from default directory
 func LoadConfig(path string) (Config, error) {
 	file, openErr := os.Open(ConfigFile)
+	defer file.Close()
 	if openErr != nil {
 		cnf := CreateDefaultConfig()
 		cnf.ExportToJson(path)
