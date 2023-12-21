@@ -25,7 +25,7 @@ func main() {
 	services.Migrate(db)
 
 	r := gin.Default()
-	r.Use(middlewares.Injector(db))
+	r.Use(middlewares.Injector(db, &cnf))
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{

@@ -7,6 +7,7 @@ import (
 
 const (
 	GormDBInstance = "gorm_db_instance"
+	ConfigInstance = "config_instance"
 )
 
 func InjectGormDB(ctx *gin.Context, db *gorm.DB) {
@@ -15,4 +16,12 @@ func InjectGormDB(ctx *gin.Context, db *gorm.DB) {
 
 func GetGormDBInstance(ctx *gin.Context) *gorm.DB {
 	return ctx.MustGet(GormDBInstance).(*gorm.DB)
+}
+
+func InjectConfig(ctx *gin.Context, cnf *Config) {
+	ctx.Set(ConfigInstance, cnf)
+}
+
+func GetConfigInstance(ctx *gin.Context) *Config {
+	return ctx.MustGet(ConfigInstance).(*Config)
 }
