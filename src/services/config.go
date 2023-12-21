@@ -2,16 +2,16 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 
 	"github.com/psycomentis/psycofolio++/src"
-	"github.com/rs/zerolog/log"
 )
 
 type Config struct {
-	Version string `json:"version" default:"1"`
+	Version string `json:"version"`
 
-	ServerPort string `json:"server_port" default:"8080"`
+	ServerPort string `json:"server_port"`
 
 	Admin AdminConfig `json:"admin"`
 
@@ -45,25 +45,24 @@ func LoadConfig(path string) (Config, error) {
 	if openErr != nil {
 		cnf := CreateDefaultConfig()
 		cnf.ExportToJson(path)
-		log.Log().Msg("Config file not found. Generating default config to: " + path)
 		return cnf, nil
 	}
 	defer file.Close()
 	var mapData map[string]interface{}
 	decodeErr := json.NewDecoder(file).Decode(&mapData)
 	if decodeErr != nil {
-		log.Error().
-			Err(decodeErr).
-			Msg("Failed to decode configuration file.")
+		return Config{}, decodeErr
 	}
 	configVer := mapData["version"]
 	if configVer != "" {
 		switch configVer {
 		case "1":
 			return parseConfigV1(&mapData), nil
+		default:
+			return Config{}, errors.New("Unkown Configuration Version")
 		}
 	}
-	return Config{}, nil
+	return Config{}, errors.New("Configuration Version is missing")
 }
 
 func parseConfigV1(m *map[string]interface{}) Config {
@@ -73,23 +72,35 @@ func parseConfigV1(m *map[string]interface{}) Config {
 	}
 
 	// Build AdminConfig
+	adminMap, ok := (*m)["admin"].(map[string]interface{})
+	if !ok {
+		adminMap = make(map[string]interface{})
+	}
 	adminConfig := AdminConfig{
-		Username: src.GetOrDefault(m, "admin_username", "admin"),
-		Password: src.GetOrDefault(m, "admin_password", "admin"),
+		Username: src.GetOrDefault(&adminMap, "username", ""),
+		Password: src.GetOrDefault(&adminMap, "password", ""),
 	}
 	cnf.Admin = adminConfig
 
 	// Build DatabaseConfig
+	dbMap, ok := (*m)["database"].(map[string]interface{})
+	if !ok {
+		dbMap = make(map[string]interface{})
+	}
 	dbConfig := DatabaseConfig{
-		ConnectionString: src.GetOrDefault(m, "db_connection", "./psyco.db"),
-		Engine:           src.GetOrDefault(m, "database_engine", "sqlite"),
+		ConnectionString: src.GetOrDefault(&dbMap, "connection_string", ""),
+		Engine:           src.GetOrDefault(&dbMap, "engine", "sqlite"),
 	}
 	cnf.Database = dbConfig
 
 	// Build LocaleConfig
+	localeMap, ok := (*m)["locale"].(map[string]interface{})
+	if !ok {
+		localeMap = make(map[string]interface{})
+	}
 	localeConfig := LocaleConfig{
-		Default:  src.GetOrDefault(m, "default_locale", "en_US"),
-		Selected: src.GetOrDefault(m, "selected_locale", "en_US"),
+		Default:  src.GetOrDefault(&localeMap, "default", "en_US"),
+		Selected: src.GetOrDefault(&localeMap, "selected", "en_US"),
 	}
 	cnf.Locale = localeConfig
 
@@ -121,7 +132,11 @@ func (cnf *Config) ExportToJson(path string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, d, os.ModePerm)
+	err = os.WriteFile(path, d, 0600)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 /* func CreateDefaultConfig() (Config, error) {
